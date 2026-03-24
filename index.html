@@ -224,7 +224,27 @@
     </div>
 
     <script>
-       const API = "https://additional-overtrustfully-bernadine.ngrok-free.dev";
+      // The Global Link to your Private Neural Engine
+const AEGIS_ENGINE_URL = "https://aegis-engine.onrender.com";
+
+// Function to send a new review to the engine for analysis
+async function processReview(orderId, reviewText) {
+    try {
+        const response = await fetch(`${AEGIS_ENGINE_URL}/analyze-review`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                order_id: orderId,
+                review_text: reviewText
+            })
+        });
+        const result = await response.json();
+        console.log("Neural Analysis Complete:", result);
+        return result;
+    } catch (error) {
+        console.error("Connection to Aegis Node Failed:", error);
+    }
+}
         function shopSystem() {
             return {
                 modal: null,
