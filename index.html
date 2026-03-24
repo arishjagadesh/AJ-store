@@ -224,179 +224,84 @@
     </div>
 
     <script>
-      // The Global Link to your Private Neural Engine
+      // 1. Unified API Link
 const AEGIS_ENGINE_URL = "https://aegis-engine.onrender.com";
 
-// Function to send a new review to the engine for analysis
-async function processReview(orderId, reviewText) {
-    try {
-        const response = await fetch(`${AEGIS_ENGINE_URL}/analyze-review`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                order_id: orderId,
-                review_text: reviewText
-            })
-        });
-        const result = await response.json();
-        console.log("Neural Analysis Complete:", result);
-        return result;
-    } catch (error) {
-        console.error("Connection to Aegis Node Failed:", error);
-    }
-}
-        function shopSystem() {
-            return {
-                modal: null,
-                selectedProduct: {},
-                activeImage: '',
-                selectedConfig: '256 GB',
-                currentPrice: 0,
-                currentMrp: 0,
-                allReviews: [],
-                custEmail: '',
-                masterCode: '',
-                reviewToken: '',
-                reviewText: '',
+function shopSystem() {
+    return {
+        modal: null,
+        selectedProduct: {},
+        activeImage: '',
+        selectedConfig: '256 GB',
+        currentPrice: 0,
+        currentMrp: 0,
+        allReviews: [],
+        custEmail: '',
+        masterCode: '',
+        reviewToken: '',
+        reviewText: '',
+        isProcessingBuy: false,
+        isProcessingReview: false,
 
-                // NEW: Lock flags to prevent double-clicking
-                isProcessingBuy: false,
-                isProcessingReview: false,
+        configs: [{ size: '256 GB', add: 0 }, { size: '512 GB', add: 15000 }, { size: '1 TB', add: 35000 }],
+        
+        products: [
+            { name: 'iPhone 15 Pro Max', basePrice: 159900, baseMrp: 199900, fullDesc: 'Forged in titanium...', images: ['https://github.com/arishjagadesh/AJ-store/blob/main/assets/iphone15.jpg?raw=true'] },
+            { name: 'MacBook Pro M3 Max', basePrice: 349900, baseMrp: 399900, fullDesc: 'Mind-blowing performance...', images: ['https://github.com/arishjagadesh/AJ-store/blob/main/assets/macbook-pro.png?raw=true'] }
+        ],
 
-                configs: [{ size: '256 GB', add: 0 }, { size: '512 GB', add: 15000 }, { size: '1 TB', add: 35000 }],
+        selectProduct(p) { 
+            this.selectedProduct = p; 
+            this.activeImage = p.images[0]; 
+            this.currentPrice = p.basePrice;
+            this.currentMrp = p.baseMrp;
+        },
+
+        filteredReviews() {
+            if (!this.selectedProduct.name) return [];
+            return this.allReviews.filter(r => r.product_name === this.selectedProduct.name);
+        },
+
+        async fetchGlobalReviews() {
+            try {
+                // Pointing to your Master Route in app.py
+                const res = await fetch(`${AEGIS_ENGINE_URL}/api/admin/reviews`);
+                this.allReviews = await res.json();
+            } catch(e) { console.log("Backend offline"); }
+        },
+        
+        async submitReview() {
+            if (!this.selectedProduct.name) return alert("Select a product!");
+            if (!this.reviewToken || !this.reviewText) return alert("Fields empty.");
+            
+            this.isProcessingReview = true;
+
+            try {
+                const res = await fetch(`${AEGIS_ENGINE_URL}/analyze-review`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        order_id: this.reviewToken, 
+                        review_text: this.reviewText,
+                        product_name: this.selectedProduct.name 
+                    })
+                });
                 
-                products: [
-                    { 
-                        name: 'iPhone 15 Pro Max', 
-                        basePrice: 159900, 
-                        baseMrp: 199900, 
-                        fullDesc: 'Forged in titanium and featuring the groundbreaking A17 Pro chip. The ultimate flagship experience.', 
-                        images: [
-                            'https://github.com/arishjagadesh/AJ-store/blob/main/assets/iphone15.jpg?raw=true',
-                            'https://github.com/arishjagadesh/AJ-store/blob/main/assets/iphone_15_pro.png?raw=true'
-                        ] 
-                    },
-                    { 
-                        name: 'MacBook Pro M3 Max', 
-                        basePrice: 349900, 
-                        baseMrp: 399900, 
-                        fullDesc: 'Mind-blowing performance for developers. Features a stunning 14-inch Liquid Retina XDR display.', 
-                        images: [
-                            'https://github.com/arishjagadesh/AJ-store/blob/main/assets/macbook-pro.png?raw=true',
-                            
-                        ] 
-                    },
-                    { 
-                        name: 'Samsung S24 Ultra', 
-                        basePrice: 129900, 
-                        baseMrp: 149900, 
-                        fullDesc: 'Galaxy AI is here. Epic search, stunning nightography, and the productivity of the integrated S-Pen.', 
-                        images: [
-                            'https://github.com/arishjagadesh/AJ-store/blob/main/assets/s24.jpg?raw=true',
-                            'https://github.com/arishjagadesh/AJ-store/blob/main/assets/galaxy-s24.jpg?raw=true'
-                        ] 
-                    },
-                    { 
-                        name: 'Apple Watch Ultra 2', 
-                        basePrice: 89900, 
-                        baseMrp: 99900, 
-                        fullDesc: 'Rugged titanium frame, precision dual-frequency GPS, and up to 36 hours of battery life.', 
-                        images: [
-                            'https://github.com/arishjagadesh/AJ-store/blob/main/assets/apple-watch.jpg?raw=true'
-                            
-                        ] 
-                    }
-                ],
-                selectProduct(p) { 
-                    this.selectedProduct = p; 
-                    this.activeImage = p.images[0]; 
-                    this.selectedConfig = '256 GB';
-                    this.currentPrice = p.basePrice;
-                    this.currentMrp = p.baseMrp;
-                },
-                updatePricing(addition) {
-                    this.currentPrice = this.selectedProduct.basePrice + addition;
-                    this.currentMrp = this.selectedProduct.baseMrp + addition;
-                },
-                filteredReviews() {
-                    if (!this.selectedProduct.name) return [];
-                    return this.allReviews.filter(r => r.product === this.selectedProduct.name);
-                },
-                async fetchGlobalReviews() {
-                    try {
-                        const res = await fetch(`${API}/api/admin/reviews`);
-                        this.allReviews = await res.json();
-                    } catch(e) { console.log("Backend offline"); }
-                },
-                
-                async processPurchase() {
-                    if (!this.selectedProduct.name) return alert('Select a product first.');
-                    if(this.masterCode !== '22CSE011') return alert('❌ INVALID MASTER CODE');
-                    
-                    this.isProcessingBuy = true; // Lock the UI
-
-                    try {
-                        const res = await fetch(`${API}/api/checkout`, {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({ email: this.custEmail, coupon: "22CSE011" })
-                        });
-                        
-                        const data = await res.json();
-                        
-                        if(res.ok) { 
-                            alert('✅ ORDER SUCCESS. Token sent to Gmail.'); 
-                            this.modal = null; 
-                            this.masterCode = '';
-                        } else {
-                            // If your backend rate-limit kicks in, it'll show the error here
-                            alert("❌ " + (data.error || "Authorization Failed."));
-                        }
-                    } catch (e) { 
-                        alert("Backend Error."); 
-                    } finally {
-                        this.isProcessingBuy = false; // Unlock the UI when request finishes
-                    }
-                },
-                
-                async submitReview() {
-                    if (!this.selectedProduct.name) return alert("Please select a product first!");
-                    if (!this.reviewToken || !this.reviewText) return alert("Fields cannot be empty.");
-                    
-                    this.isProcessingReview = true; // Lock the UI
-
-                    try {
-                        const res = await fetch(`${API}/api/verify_review`, {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({ 
-                                order_id: this.reviewToken, 
-                                review_text: this.reviewText,
-                                product_name: this.selectedProduct.name 
-                            })
-                        });
-                        
-                        const data = await res.json();
-                        const responseMessage = data.message || data.error || data.msg || JSON.stringify(data);
-                        
-                        if (res.ok) {
-                            alert("✅ Aegis Status: " + responseMessage);
-                            this.modal = null;
-                            this.reviewToken = '';
-                            this.reviewText = '';
-                            this.fetchGlobalReviews(); 
-                        } else {
-                            alert("❌ Aegis Failed: " + responseMessage);
-                        }
-                        
-                    } catch(e) { 
-                        alert("🚨 Backend Error: Cannot reach the Flask server."); 
-                    } finally {
-                        this.isProcessingReview = false; // Unlock the UI when request finishes
-                    }
+                if (res.ok) {
+                    alert("✅ Aegis Status: Signal Vaulted");
+                    this.modal = null;
+                    this.fetchGlobalReviews(); 
+                } else {
+                    alert("❌ Aegis Failed: Invalid Token");
                 }
+            } catch(e) { 
+                alert("🚨 Backend Error: Engine unreachable."); 
+            } finally {
+                this.isProcessingReview = false;
             }
         }
+    }
+}
     </script>
 </body>
 </html>
