@@ -224,7 +224,7 @@
     </div>
 
     <script>
-       <script>
+      
     const API = "https://aegis-engine.onrender.com"; // Verified Render URL
 
     function shopSystem() {
@@ -276,7 +276,9 @@
                 } catch(e) { console.log("Backend offline"); }
             },
             
-           async function processPurchase() {
+           
+
+           async  processPurchase() {
     // 1. Basic Validation
     if (!this.selectedProduct.name) return alert('Select a hardware node first.');
     if (!this.custEmail.includes('@')) return alert('Valid Gmail required for Token delivery.');
@@ -313,8 +315,7 @@
     } finally {
         this.isProcessingBuy = false; // Unlock UI
     }
-},
-            
+           },
             async submitReview() {
                 if (!this.reviewToken || !this.reviewText) return alert("Fields cannot be empty.");
                 this.isProcessingReview = true;
