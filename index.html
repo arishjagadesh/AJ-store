@@ -276,11 +276,44 @@
                 } catch(e) { console.log("Backend offline"); }
             },
             
-            async processPurchase() {
-                if(this.masterCode !== '22CSE011') return alert('❌ INVALID MASTER CODE');
-                alert('✅ Handshake Successful. In a real SaaS, this would generate a PRTC token and email it to: ' + this.custEmail);
-                this.modal = null;
-            },
+           async function processPurchase() {
+    // 1. Basic Validation
+    if (!this.selectedProduct.name) return alert('Select a hardware node first.');
+    if (!this.custEmail.includes('@')) return alert('Valid Gmail required for Token delivery.');
+    if (this.masterCode !== '22CSE011') return alert('❌ INVALID MASTER CODE');
+    
+    this.isProcessingBuy = true; // Lock UI
+
+    try {
+        // 2. Call the Engine to generate Token + Send Email
+        const res = await fetch(`${API}/api/checkout`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                email: this.custEmail, 
+                product: this.selectedProduct.name 
+            })
+        });
+        
+        const data = await res.json();
+        
+        if (res.ok) { 
+            // 3. Success Feedback
+            alert(`✅ PROVISION SUCCESS\n\nToken: ${data.token}\nSent to: ${this.custEmail}\n\nPlease check your inbox to verify your review.`); 
+            
+            this.modal = null; 
+            this.masterCode = '';
+            // Optional: Auto-fill the review token for them
+            this.reviewToken = data.token;
+        } else {
+            alert("❌ AEGIS_ERROR: " + (data.error || "Handshake Failed."));
+        }
+    } catch (e) { 
+        alert("🚨 CONNECTION_LOST: Engine unreachable."); 
+    } finally {
+        this.isProcessingBuy = false; // Unlock UI
+    }
+},
             
             async submitReview() {
                 if (!this.reviewToken || !this.reviewText) return alert("Fields cannot be empty.");
