@@ -3,351 +3,313 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AJ Store | Neural Tech Console</title>
+    <title>AJ Store | Neural Hardware Provisioning</title>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800;900&display=swap');
-        body { background-color: #f1f3f6; font-family: 'Plus Jakarta Sans', sans-serif; color: #1a202c; overflow: hidden; }
+        
+        :root {
+            --glass: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --accent: #2874f0;
+        }
 
-        /* Left Sidebar Items */
-        .sidebar-node { background: white; border-radius: 12px; transition: 0.2s; cursor: pointer; border: 2px solid transparent; }
-        .sidebar-node:hover { transform: translateX(4px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .node-active { border-color: #2874f0 !important; background: #eff6ff !important; }
+        body { 
+            background: radial-gradient(circle at top right, #f8fafc, #e2e8f0);
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            color: #1e293b; 
+            overflow: hidden; 
+        }
 
-        /* Config & Thumbnails */
-        .config-box { border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; cursor: pointer; transition: 0.2s; background: white; }
-        .config-active { border-color: #fb641b; background: #fffaf0; box-shadow: 0 0 0 1px #fb641b; }
-        .thumb-active { border-color: #2874f0 !important; box-shadow: 0 0 0 2px rgba(40,116,240,0.3); }
+        /* 3D Product Cards */
+        .product-node {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
 
-        /* Buttons & Inputs */
-        .btn-elite { background: linear-gradient(135deg, #fb641b 0%, #ff8c00 100%); transition: 0.2s; color: white; font-weight: 800; border-radius: 8px; }
-        .secure-input { letter-spacing: 0.8em; text-align: center; font-weight: 900; color: #10B981; }
+        .product-node:hover {
+            transform: translateY(-8px) rotateX(4deg) rotateY(4deg);
+            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.1);
+            border-color: var(--accent);
+        }
 
-        /* Custom Scrollbar */
-        .custom-scroll::-webkit-scrollbar { width: 5px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .node-active {
+            background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%) !important;
+            border: 2px solid var(--accent) !important;
+            box-shadow: 0 10px 20px -5px rgba(40,116,240,0.2);
+        }
+
+        /* Billion-Dollar Buttons */
+        .btn-provision {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn-provision:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
 
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body x-data="shopSystem()" x-init="fetchGlobalReviews()" class="h-screen flex flex-col">
+<body x-data="shopSystem()" x-init="initAnimations(); fetchGlobalReviews()" class="h-screen flex flex-col">
 
-    <header class="bg-blue-600 text-white h-14 flex items-center px-6 justify-between shadow-md z-20 shrink-0">
-        <div class="flex items-center gap-3">
-            <div class="bg-white text-blue-600 h-8 w-8 rounded flex items-center justify-center font-black text-lg">A</div>
-            <span class="font-black tracking-tight text-xl uppercase">AJ Store</span>
-        </div>
+    <header class="h-16 flex items-center px-10 justify-between backdrop-blur-md border-b border-white/20 z-50">
         <div class="flex items-center gap-4">
-            <span class="text-[10px] font-bold text-blue-100 bg-blue-800 px-4 py-1.5 rounded-full uppercase tracking-widest shadow-inner">
-                Operator: Arish Jagadesh | Terminal Active
-            </span>
+            <div class="bg-slate-900 text-white h-10 w-10 rounded-xl flex items-center justify-center font-black text-xl shadow-lg">A</div>
+            <span class="font-black tracking-tighter text-2xl text-slate-900">AJ<span class="text-blue-600">STORE</span></span>
+        </div>
+        <div class="flex items-center gap-6">
+            <div class="flex flex-col items-end">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">System Status</span>
+                <span class="flex items-center gap-2 text-xs font-black text-green-600 uppercase">
+                    <span class="h-1.5 w-1.5 bg-green-500 rounded-full animate-pulse"></span> Terminal Active
+                </span>
+            </div>
         </div>
     </header>
 
-    <div class="flex flex-1 overflow-hidden">
+    <main class="flex flex-1 overflow-hidden">
         
-        <div class="w-1/5 min-w-[250px] bg-white border-r border-gray-200 h-full overflow-y-auto custom-scroll z-10 shadow-lg">
-            <div class="p-5 bg-gray-50 border-b border-gray-200 font-black text-xs text-gray-500 uppercase tracking-widest sticky top-0 z-10">
-                Hardware Inventory
-            </div>
-            <div class="p-3 space-y-2">
+        <aside class="w-1/4 min-w-[300px] border-r border-white/30 p-6 overflow-y-auto custom-scroll">
+            <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-8">Hardware Inventory</h2>
+            <div class="space-y-4" id="sidebar-list">
                 <template x-for="product in products" :key="product.name">
                     <div @click="selectProduct(product)" 
-                         :class="selectedProduct.name === product.name ? 'node-active shadow-sm' : ''"
-                         class="sidebar-node p-4 flex flex-col items-center gap-3 border border-gray-100 text-center">
-                        <div class="h-20 w-20 bg-white rounded-lg flex items-center justify-center p-1 border border-gray-100 shrink-0">
-                            <img :src="product.images[0]" class="h-full w-full object-contain rounded">
+                         :class="selectedProduct.name === product.name ? 'node-active' : ''"
+                         class="product-node p-4 flex items-center gap-4 rounded-2xl cursor-pointer group">
+                        <div class="h-16 w-16 bg-white rounded-xl p-2 shadow-inner group-hover:scale-110 transition-transform duration-500">
+                            <img :src="product.images[0]" class="h-full w-full object-contain">
                         </div>
                         <div>
-                            <h3 class="font-bold text-xs text-gray-800 leading-tight" x-text="product.name"></h3>
-                            <p class="text-blue-600 font-extrabold text-sm mt-1" x-text="'₹' + product.basePrice.toLocaleString()"></p>
+                            <h3 class="font-extrabold text-sm text-slate-800" x-text="product.name"></h3>
+                            <p class="text-blue-600 font-bold text-xs" x-text="'₹' + product.basePrice.toLocaleString()"></p>
                         </div>
                     </div>
                 </template>
             </div>
-        </div>
+        </aside>
 
-        <div class="w-1/2 flex-1 bg-white h-full overflow-y-auto custom-scroll relative border-r border-gray-200">
-            
+        <section class="flex-1 bg-white/40 flex flex-col items-center justify-center p-12 overflow-y-auto custom-scroll relative">
             <template x-if="!selectedProduct.name">
-                <div class="h-full flex flex-col items-center justify-center text-gray-300">
-                    <span class="text-8xl mb-6 opacity-30">📦</span>
-                    <p class="font-black uppercase tracking-[0.3em] text-sm">Select Node to Provision</p>
+                <div class="text-center">
+                    <div class="text-8xl mb-4 opacity-10 grayscale">📦</div>
+                    <p class="text-slate-400 font-bold uppercase tracking-widest text-xs">Initialize Hardware Provisioning</p>
                 </div>
             </template>
 
-            <div x-show="selectedProduct.name" class="p-10 max-w-2xl mx-auto" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4">
-                
-                <h1 class="text-4xl font-black text-gray-900 mb-3 tracking-tight" x-text="selectedProduct.name"></h1>
-                <div class="flex items-center gap-3 mb-8">
-                    <span class="bg-green-600 text-white px-2 py-0.5 rounded text-[11px] font-bold shadow-sm">4.8 ★</span>
-                    <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest">Aegis Protected</span>
-                </div>
-                
-                <div class="w-full h-80 bg-gray-50 border border-gray-100 rounded-3xl p-6 flex justify-center items-center mb-6 shadow-inner">
-                    <img :src="activeImage" :key="activeImage" class="max-h-full object-contain hover:scale-105 transition-transform duration-500">
+            <div x-show="selectedProduct.name" x-cloak class="w-full max-w-3xl" x-transition>
+                <div class="flex justify-between items-start mb-10">
+                    <div>
+                        <h1 class="text-5xl font-black text-slate-900 tracking-tighter" x-text="selectedProduct.name"></h1>
+                        <div class="flex gap-2 mt-4">
+                            <span class="bg-slate-900 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">Aegis Protected</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-4xl font-black text-slate-900" x-text="'₹' + currentPrice.toLocaleString()"></p>
+                        <p class="text-slate-400 line-through text-sm font-bold" x-text="'₹' + currentMrp.toLocaleString()"></p>
+                    </div>
                 </div>
 
-                <div class="flex gap-3 justify-center mb-8">
-                    <template x-for="(img, index) in selectedProduct.images" :key="index">
-                        <div @click="activeImage = img"
-                             :class="activeImage === img ? 'thumb-active' : 'border-gray-200 hover:border-blue-300'"
-                             class="w-16 h-16 border-2 rounded-lg p-1 cursor-pointer bg-white transition">
-                            <img :src="img" class="h-full w-full object-contain rounded">
-                        </div>
+                <div class="relative group mb-12">
+                    <div class="absolute inset-0 bg-blue-400/10 blur-3xl rounded-full scale-75 group-hover:scale-100 transition-transform duration-700"></div>
+                    <div class="relative bg-white/80 border border-white rounded-[40px] p-12 shadow-2xl overflow-hidden">
+                        <img :src="activeImage" class="h-80 w-full object-contain hover:scale-105 transition-transform duration-700">
+                    </div>
+                </div>
+
+                <div class="flex gap-4 justify-center mb-12">
+                    <template x-for="img in selectedProduct.images">
+                        <button @click="activeImage = img" class="h-20 w-20 rounded-2xl border-2 bg-white p-2 transition-all hover:border-blue-500" :class="activeImage === img ? 'border-blue-600' : 'border-transparent'">
+                            <img :src="img" class="h-full w-full object-contain">
+                        </button>
                     </template>
                 </div>
-                
-                <p class="text-gray-500 text-base leading-relaxed mb-8 border-l-4 border-blue-500 pl-4" x-text="selectedProduct.fullDesc"></p>
 
-                <div class="mb-8">
-                    <div class="flex items-end gap-3 mb-1">
-                        <p class="text-red-600 text-2xl font-light">-15%</p>
-                        <p class="text-4xl font-black text-gray-900" x-text="'₹' + currentPrice.toLocaleString()"></p>
-                    </div>
-                    <p class="text-gray-400 text-sm font-semibold">M.R.P: <span class="line-through" x-text="'₹' + currentMrp.toLocaleString()"></span></p>
+                <p class="text-slate-500 font-medium leading-relaxed text-center mb-12" x-text="selectedProduct.fullDesc"></p>
+
+                <div class="flex gap-4 mb-12">
+                    <template x-for="opt in configs">
+                        <button @click="selectedConfig = opt.size; updatePricing(opt.add)" 
+                                :class="selectedConfig === opt.size ? 'bg-slate-900 text-white' : 'bg-white text-slate-600'"
+                                class="flex-1 p-4 rounded-2xl border border-slate-200 font-bold transition-all shadow-sm">
+                            <span class="block text-sm" x-text="opt.size"></span>
+                            <span class="text-[10px] opacity-50" x-text="opt.add === 0 ? 'Standard' : '+ ₹' + opt.add.toLocaleString()"></span>
+                        </button>
+                    </template>
                 </div>
 
-                <div class="mb-10">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Memory Configuration</p>
-                    <div class="flex gap-3">
-                        <template x-for="opt in configs">
-                            <div @click="selectedConfig = opt.size; updatePricing(opt.add)" 
-                                 :class="selectedConfig === opt.size ? 'config-active' : ''"
-                                 class="config-box flex-1 text-center shadow-sm">
-                                <b class="text-sm block text-gray-800" x-text="opt.size"></b>
-                                <span class="text-[10px] text-gray-500 font-bold" x-text="opt.add === 0 ? 'Standard' : '+ ₹' + opt.add.toLocaleString()"></span>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-
-                <div class="bg-gray-50 p-8 rounded-2xl border border-gray-200 text-center">
-                    <p class="text-green-700 font-bold mb-4 flex items-center justify-center gap-2">
-                        <span class="h-2 w-2 bg-green-600 rounded-full animate-ping"></span> In Stock & Ready to Ship
-                    </p>
-                    <button @click="modal = 'buy'" class="btn-elite w-full py-4 text-sm font-black uppercase tracking-wider rounded-xl shadow-md hover:-translate-y-1 active:scale-95 transition">Secure With Master Code</button>
-                </div>
+                <button @click="modal = 'buy'" class="btn-provision w-full py-6 rounded-3xl font-black uppercase tracking-[0.2em] text-sm">Provision Hardware Node</button>
             </div>
-        </div>
+        </section>
 
-        <div class="w-[30%] min-w-[350px] col-right h-full flex flex-col relative bg-[#f8fafc]">
+        <aside class="w-[30%] border-l border-white/30 flex flex-col bg-slate-50/50">
+            <div class="p-8 border-b border-white/20 flex justify-between items-center">
+                <h3 class="font-black text-slate-900 uppercase tracking-tighter">Neural Traces</h3>
+                <button @click="modal = 'review'" class="bg-blue-600 text-white p-3 rounded-xl shadow-lg hover:rotate-6 transition-transform">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
+                </button>
+            </div>
             
-            <div class="p-6 border-b border-gray-200 bg-white shrink-0 flex justify-between items-center shadow-sm z-10">
-                <div>
-                    <h3 class="text-lg font-black text-gray-900 uppercase tracking-tight">Verified Feed</h3>
-                </div>
-                <button @click="modal = 'review'" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold text-xs transition shadow-md">+ Submit Trace</button>
-            </div>
-
-            <div class="flex-1 overflow-y-auto p-6 space-y-4 custom-scroll">
-                
-                <template x-if="!selectedProduct.name">
-                    <div class="text-center mt-10">
-                        <p class="text-gray-400 text-xs font-bold uppercase tracking-widest italic">Select a hardware node to view telemetry.</p>
-                    </div>
-                </template>
-
-                <template x-if="selectedProduct.name">
-                    <div>
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Feedback for: <span class="text-blue-600" x-text="selectedProduct.name"></span></p>
-                        
-                        <div class="space-y-4">
-                            <template x-for="rev in filteredReviews()">
-                                <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm relative transition hover:shadow-md">
-                                    <div class="absolute top-0 right-0 px-3 py-1 bg-green-50 text-green-700 text-[9px] font-black uppercase rounded-bl-lg border-b border-l border-green-100" x-show="rev.status === 'Verified'">Aegis Validated</div>
-                                    <div class="flex items-center gap-3 mb-3">
-                                        <div class="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-xs" x-text="rev.email[0].toUpperCase()"></div>
-                                        <div>
-                                            <p class="text-xs font-bold text-gray-900" x-text="rev.email"></p>
-                                            <p class="text-[9px] font-mono text-gray-400" x-text="'Ref: #' + rev.order_id"></p>
-                                        </div>
-                                    </div>
-                                    <p class="text-gray-700 text-sm italic font-medium leading-relaxed" x-text="'“' + rev.text + '”'"></p>
-                                </div>
-                            </template>
-                            
-                            <template x-if="filteredReviews().length === 0">
-                                <div class="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-300">
-                                    <p class="text-gray-400 font-bold text-xs uppercase tracking-widest">0 Traces Indexed</p>
-                                </div>
-                            </template>
+            <div class="flex-1 overflow-y-auto p-8 space-y-6 custom-scroll">
+                <template x-for="rev in filteredReviews()">
+                    <div class="bg-white p-6 rounded-[28px] shadow-sm border border-slate-100 relative group overflow-hidden">
+                        <div class="absolute top-0 right-0 p-3" x-show="rev.status === 'Verified'">
+                            <span class="bg-green-100 text-green-700 text-[9px] font-black px-2 py-1 rounded-lg">AEGIS_VALIDATED</span>
                         </div>
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="h-10 w-10 bg-slate-100 rounded-full flex items-center justify-center font-bold text-slate-400" x-text="rev.email[0].toUpperCase()"></div>
+                            <div>
+                                <p class="text-xs font-black text-slate-800" x-text="rev.email"></p>
+                                <p class="text-[9px] font-mono text-slate-400 uppercase" x-text="'Ref: ' + rev.order_id"></p>
+                            </div>
+                        </div>
+                        <p class="text-slate-600 text-sm leading-relaxed italic" x-text="'“' + rev.review_text + '”'"></p>
                     </div>
                 </template>
-
             </div>
-        </div>
+        </aside>
+    </main>
 
-    </div>
-
-    <div x-show="modal === 'buy'" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" x-cloak x-transition>
-        <div class="bg-white w-full max-w-sm p-10 rounded-[32px] shadow-2xl">
-            <h2 class="text-2xl font-black text-center mb-8 uppercase text-gray-800">Secure Provision</h2>
-            <div class="space-y-5">
-                <input type="email" x-model="custEmail" placeholder="Gmail for Token Delivery" class="w-full p-4 rounded-xl bg-gray-50 border outline-none font-semibold text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                <input type="password" x-model="masterCode" placeholder="••••••••" class="w-full p-4 rounded-xl bg-gray-50 border secure-input outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-            </div>
-            
-            <button @click="processPurchase()" 
-                    :disabled="isProcessingBuy"
-                    :class="isProcessingBuy ? 'opacity-50 cursor-not-allowed' : 'hover:-translate-y-1 active:scale-95'"
-                    class="w-full mt-8 py-4 btn-elite text-sm tracking-widest shadow-xl transition">
-                <span x-show="!isProcessingBuy">AUTHORIZE</span>
-                <span x-show="isProcessingBuy">PROCESSING... ⏳</span>
-            </button>
-            
-            <button @click="modal = null" class="w-full mt-4 text-gray-400 font-bold uppercase text-[10px] tracking-widest hover:text-red-500 transition">Abort Protocol</button>
-        </div>
-    </div>
-
-    <div x-show="modal === 'review'" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" x-cloak x-transition>
-        <div class="bg-white w-full max-w-lg p-10 rounded-[32px] shadow-2xl border-t-[8px] border-blue-600">
-            <h2 class="text-3xl font-black text-center mb-2 uppercase text-gray-900">Neural Feedback</h2>
-            <p class="text-center text-gray-500 text-xs mb-8 font-semibold" x-text="selectedProduct.name ? 'Validating for: ' + selectedProduct.name : 'No product selected.'"></p>
+    <div x-show="modal === 'buy'" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-xl" x-cloak x-transition>
+        <div class="bg-white w-full max-w-sm p-12 rounded-[40px] shadow-2xl">
+            <h2 class="text-2xl font-black text-center mb-8 tracking-tighter">Secure Provisioning</h2>
             <div class="space-y-4">
-                <input type="text" x-model="reviewToken" placeholder="Enter PRTC Token" class="w-full p-4 rounded-xl bg-gray-50 font-mono text-sm border outline-none focus:border-blue-500">
-                <textarea x-model="reviewText" rows="5" placeholder="System will analyze your feedback..." class="w-full p-4 rounded-xl bg-gray-50 border text-sm font-medium outline-none focus:border-blue-500"></textarea>
+                <input type="email" x-model="custEmail" placeholder="verified@gmail.com" class="w-full p-5 rounded-2xl bg-slate-50 border-none outline-none focus:ring-2 ring-blue-500 font-bold text-sm">
+                <input type="password" x-model="masterCode" placeholder="Master Protocol Code" class="w-full p-5 rounded-2xl bg-slate-50 border-none outline-none focus:ring-2 ring-blue-500 text-center font-black tracking-[0.5em]">
             </div>
-
-            <button @click="submitReview()" 
-                    :disabled="isProcessingReview"
-                    :class="isProcessingReview ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700 active:scale-95'"
-                    class="w-full mt-8 py-4 bg-blue-600 transition text-white font-black rounded-xl shadow-lg uppercase tracking-widest">
-                <span x-show="!isProcessingReview">Validate & Submit</span>
-                <span x-show="isProcessingReview">PROCESSING... ⏳</span>
+            <button @click="processPurchase()" :disabled="isProcessingBuy" class="btn-provision w-full mt-8 py-5 rounded-2xl font-black text-sm uppercase tracking-widest">
+                <span x-show="!isProcessingBuy">Authorize Handshake</span>
+                <span x-show="isProcessingBuy">Processing Protocol...</span>
             </button>
+            <button @click="modal = null" class="w-full mt-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-red-500">Abort</button>
+        </div>
+    </div>
 
-            <button @click="modal = null" class="w-full mt-4 text-gray-400 font-bold uppercase text-[10px] tracking-widest hover:text-red-500 transition">Close Terminal</button>
+    <div x-show="modal === 'review'" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-xl" x-cloak x-transition>
+        <div class="bg-white w-full max-w-lg p-12 rounded-[40px] shadow-2xl">
+            <h2 class="text-3xl font-black mb-2 tracking-tighter">Submit Neural Trace</h2>
+            <p class="text-slate-400 text-xs font-bold uppercase mb-8">Validating for: <span class="text-blue-600" x-text="selectedProduct.name"></span></p>
+            <div class="space-y-4">
+                <input type="text" x-model="reviewToken" placeholder="PRTC-TOKEN-ID" class="w-full p-5 rounded-2xl bg-slate-50 font-mono text-xs border-none outline-none focus:ring-2 ring-blue-500">
+                <textarea x-model="reviewText" rows="4" placeholder="Input hardware telemetry (your feedback)..." class="w-full p-5 rounded-2xl bg-slate-50 border-none outline-none focus:ring-2 ring-blue-500 text-sm font-medium"></textarea>
+            </div>
+            <button @click="submitReview()" :disabled="isProcessingReview" class="btn-provision w-full mt-8 py-5 rounded-2xl font-black text-sm uppercase tracking-widest">
+                <span x-show="!isProcessingReview">Analyze & Vault</span>
+                <span x-show="isProcessingReview">DeBERTa Processing...</span>
+            </button>
+            <button @click="modal = null" class="w-full mt-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-red-500">Close Interface</button>
         </div>
     </div>
 
     <script>
-      
-    const API = "https://aegis-engine.onrender.com"; // Verified Render URL
+        const API = "https://aegis-engine.onrender.com";
 
-    function shopSystem() {
-        return {
-            modal: null,
-            selectedProduct: {},
-            activeImage: '',
-            selectedConfig: '256 GB',
-            currentPrice: 0,
-            currentMrp: 0,
-            allReviews: [],
-            custEmail: '',
-            masterCode: '',
-            reviewToken: '',
-            reviewText: '',
-            isProcessingBuy: false,
-            isProcessingReview: false,
+        function shopSystem() {
+            return {
+                modal: null,
+                selectedProduct: {},
+                activeImage: '',
+                selectedConfig: '256 GB',
+                currentPrice: 0,
+                currentMrp: 0,
+                allReviews: [],
+                custEmail: '',
+                masterCode: '',
+                reviewToken: '',
+                reviewText: '',
+                isProcessingBuy: false,
+                isProcessingReview: false,
+                configs: [{ size: '256 GB', add: 0 }, { size: '512 GB', add: 15000 }, { size: '1 TB', add: 35000 }],
+                
+                products: [
+                    { name: 'iPhone 15 Pro Max', basePrice: 159900, baseMrp: 199900, fullDesc: 'Forged in titanium and featuring the groundbreaking A17 Pro chip. The ultimate flagship experience.', images: ['assets/iphone15.jpg', 'assets/iphone_15_pro.png'] },
+                    { name: 'MacBook Pro M3 Max', basePrice: 349900, baseMrp: 399900, fullDesc: 'Mind-blowing performance for developers. Features a stunning 14-inch Liquid Retina XDR display.', images: ['assets/macbook-pro.png'] },
+                    { name: 'Samsung S24 Ultra', basePrice: 129900, baseMrp: 149900, fullDesc: 'Galaxy AI is here. Epic search, stunning nightography, and the productivity of the integrated S-Pen.', images: ['assets/s24.jpg', 'assets/galaxy-s24.jpg'] },
+                    { name: 'Apple Watch Ultra 2', basePrice: 89900, baseMrp: 99900, fullDesc: 'Rugged titanium frame, precision dual-frequency GPS, and up to 36 hours of battery life.', images: ['assets/apple-watch.jpg'] }
+                ],
 
-            configs: [{ size: '256 GB', add: 0 }, { size: '512 GB', add: 15000 }, { size: '1 TB', add: 35000 }],
-            
-            products: [
-                { name: 'iPhone 15 Pro Max', basePrice: 159900, baseMrp: 199900, fullDesc: 'Forged in titanium...', images: ['https://github.com/arishjagadesh/AJ-store/blob/main/assets/iphone15.jpg?raw=true'] },
-                { name: 'MacBook Pro M3 Max', basePrice: 349900, baseMrp: 399900, fullDesc: 'Mind-blowing performance...', images: ['https://github.com/arishjagadesh/AJ-store/blob/main/assets/macbook-pro.png?raw=true'] },
-                { name: 'Samsung S24 Ultra', basePrice: 129900, baseMrp: 149900, fullDesc: 'Galaxy AI is here...', images: ['https://github.com/arishjagadesh/AJ-store/blob/main/assets/s24.jpg?raw=true'] },
-                { name: 'Apple Watch Ultra 2', basePrice: 89900, baseMrp: 99900, fullDesc: 'Rugged titanium...', images: ['https://github.com/arishjagadesh/AJ-store/blob/main/assets/apple-watch.jpg?raw=true'] }
-            ],
-
-            selectProduct(p) { 
-                this.selectedProduct = p; 
-                this.activeImage = p.images[0]; 
-                this.currentPrice = p.basePrice;
-                this.currentMrp = p.baseMrp;
-            },
-
-            updatePricing(addition) {
-                this.currentPrice = this.selectedProduct.basePrice + addition;
-                this.currentMrp = this.selectedProduct.baseMrp + addition;
-            },
-
-            filteredReviews() {
-                if (!this.selectedProduct.name) return [];
-                return this.allReviews.filter(r => r.product_name === this.selectedProduct.name);
-            },
-
-            async fetchGlobalReviews() {
-                try {
-                    const res = await fetch(`${API}/api/admin/reviews`);
-                    this.allReviews = await res.json();
-                } catch(e) { console.log("Backend offline"); }
-            },
-            
-           
-
-           async  processPurchase() {
-    // 1. Basic Validation
-    if (!this.selectedProduct.name) return alert('Select a hardware node first.');
-    if (!this.custEmail.includes('@')) return alert('Valid Gmail required for Token delivery.');
-    if (this.masterCode !== '22CSE011') return alert('❌ INVALID MASTER CODE');
-    
-    this.isProcessingBuy = true; // Lock UI
-
-    try {
-        // 2. Call the Engine to generate Token + Send Email
-        const res = await fetch(`${API}/api/checkout`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                email: this.custEmail, 
-                product: this.selectedProduct.name 
-            })
-        });
-        
-        const data = await res.json();
-        
-        if (res.ok) { 
-            // 3. Success Feedback
-            alert(`✅ PROVISION SUCCESS\n\nToken: ${data.token}\nSent to: ${this.custEmail}\n\nPlease check your inbox to verify your review.`); 
-            
-            this.modal = null; 
-            this.masterCode = '';
-            // Optional: Auto-fill the review token for them
-            this.reviewToken = data.token;
-        } else {
-            alert("❌ AEGIS_ERROR: " + (data.error || "Handshake Failed."));
-        }
-    } catch (e) { 
-        alert("🚨 CONNECTION_LOST: Engine unreachable."); 
-    } finally {
-        this.isProcessingBuy = false; // Unlock UI
-    }
-           },
-            async submitReview() {
-                if (!this.reviewToken || !this.reviewText) return alert("Fields cannot be empty.");
-                this.isProcessingReview = true;
-
-                try {
-                    // CHANGED: Unified endpoint to match Master app.py
-                    const res = await fetch(`${API}/analyze-review`, {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ 
-                            order_id: this.reviewToken, 
-                            review_text: this.reviewText,
-                            product_name: this.selectedProduct.name 
-                        })
+                initAnimations() {
+                    gsap.from("#sidebar-list > div", {
+                        duration: 1,
+                        opacity: 0,
+                        y: 30,
+                        stagger: 0.2,
+                        ease: "expo.out"
                     });
-                    
-                    const data = await res.json();
-                    if (res.ok) {
-                        alert("✅ Aegis Status: Signal Vaulted and Verified.");
-                        this.modal = null;
-                        this.fetchGlobalReviews(); 
-                    } else {
-                        alert("❌ Aegis Failed: " + (data.message || "Invalid Token"));
-                    }
-                } catch(e) { 
-                    alert("🚨 Backend Error: Cannot reach the engine."); 
-                } finally {
-                    this.isProcessingReview = false;
+                },
+
+                selectProduct(p) { 
+                    this.selectedProduct = p; 
+                    this.activeImage = p.images[0]; 
+                    this.currentPrice = p.basePrice;
+                    this.currentMrp = p.baseMrp;
+                },
+
+                updatePricing(addition) {
+                    this.currentPrice = this.selectedProduct.basePrice + addition;
+                    this.currentMrp = this.selectedProduct.baseMrp + addition;
+                },
+
+                filteredReviews() {
+                    return this.allReviews.filter(r => r.product_name === this.selectedProduct.name);
+                },
+
+                async fetchGlobalReviews() {
+                    try {
+                        const res = await fetch(`${API}/api/admin/reviews`);
+                        this.allReviews = await res.json();
+                    } catch(e) { console.log("Backend offline"); }
+                },
+
+                async processPurchase() {
+                    if (!this.custEmail.includes('@') || this.masterCode !== '22CSE011') return alert('❌ Handshake Denied');
+                    this.isProcessingBuy = true;
+                    try {
+                        const res = await fetch(`${API}/api/checkout`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: this.custEmail, product: this.selectedProduct.name })
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                            alert(`✅ PROVISION SUCCESS\nToken: ${data.token}`);
+                            this.modal = null;
+                            this.reviewToken = data.token;
+                        }
+                    } catch (e) { alert("🚨 Engine Offline"); }
+                    finally { this.isProcessingBuy = false; }
+                },
+
+                async submitReview() {
+                    if (!this.reviewToken || !this.reviewText) return alert("Telemtry incomplete.");
+                    this.isProcessingReview = true;
+                    try {
+                        const res = await fetch(`${API}/analyze-review`, {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ order_id: this.reviewToken, review_text: this.reviewText, product_name: this.selectedProduct.name, email: this.custEmail })
+                        });
+                        if (res.ok) {
+                            alert("✅ Signal Vaulted.");
+                            this.modal = null;
+                            this.fetchGlobalReviews(); 
+                        }
+                    } catch(e) { alert("🚨 API Error"); }
+                    finally { this.isProcessingReview = false; }
                 }
             }
         }
-    }
     </script>
 </body>
 </html>
