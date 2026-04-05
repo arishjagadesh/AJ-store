@@ -11,7 +11,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800;900&display=swap');
         
         :root {
-            --glass: rgba(255, 255, 255, 0.8);
+            --glass: rgba(255, 255, 255, 0.75);
             --glass-border: rgba(255, 255, 255, 0.4);
             --accent: #2874f0;
         }
@@ -23,39 +23,43 @@
             overflow: hidden; 
         }
 
-        /* 3D Product Cards */
+        /* Advanced 3D Physics */
         .product-node {
             background: var(--glass);
             backdrop-filter: blur(12px);
             border: 1px solid var(--glass-border);
-            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
+                        box-shadow 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
+                        background 0.4s ease;
             transform-style: preserve-3d;
-            perspective: 1000px;
+            will-change: transform;
         }
 
         .product-node:hover {
-            transform: translateY(-8px) rotateX(4deg) rotateY(4deg);
-            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.1);
+            transform: perspective(1000px) translateY(-8px) rotateX(4deg) rotateY(4deg);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.12);
             border-color: var(--accent);
         }
 
         .node-active {
             background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%) !important;
             border: 2px solid var(--accent) !important;
-            box-shadow: 0 10px 20px -5px rgba(40,116,240,0.2);
+            box-shadow: 0 15px 30px -5px rgba(40,116,240,0.2);
         }
 
-        /* Billion-Dollar Buttons */
+        /* Smooth Custom Scroll */
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
         .btn-provision {
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            color: white;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 20px -5px rgba(15, 23, 42, 0.3);
         }
 
         .btn-provision:hover {
-            transform: scale(1.02);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            transform: scale(1.03) translateY(-2px);
+            box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.4);
         }
 
         [x-cloak] { display: none !important; }
@@ -63,152 +67,162 @@
 </head>
 <body x-data="shopSystem()" x-init="initAnimations(); fetchGlobalReviews()" class="h-screen flex flex-col">
 
-    <header class="h-16 flex items-center px-10 justify-between backdrop-blur-md border-b border-white/20 z-50">
+    <header class="h-16 flex items-center px-12 justify-between backdrop-blur-xl border-b border-white/20 z-50">
         <div class="flex items-center gap-4">
-            <div class="bg-slate-900 text-white h-10 w-10 rounded-xl flex items-center justify-center font-black text-xl shadow-lg">A</div>
-            <span class="font-black tracking-tighter text-2xl text-slate-900">AJ<span class="text-blue-600">STORE</span></span>
+            <div class="bg-slate-900 text-white h-10 w-10 rounded-xl flex items-center justify-center font-black text-xl shadow-2xl">A</div>
+            <span class="font-black tracking-tighter text-2xl text-slate-900 uppercase">AJ<span class="text-blue-600">Store</span></span>
         </div>
-        <div class="flex items-center gap-6">
+        <div class="flex items-center gap-8">
             <div class="flex flex-col items-end">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">System Status</span>
-                <span class="flex items-center gap-2 text-xs font-black text-green-600 uppercase">
-                    <span class="h-1.5 w-1.5 bg-green-500 rounded-full animate-pulse"></span> Terminal Active
-                </span>
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-1">System Status</span>
+                <div class="flex items-center gap-2 text-[10px] font-bold text-green-600 uppercase">
+                    <span class="h-2 w-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_#22c55e]"></span> 
+                    Neural Terminal Active
+                </div>
             </div>
         </div>
     </header>
 
     <main class="flex flex-1 overflow-hidden">
         
-        <aside class="w-1/4 min-w-[300px] border-r border-white/30 p-6 overflow-y-auto custom-scroll">
-            <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-8">Hardware Inventory</h2>
-            <div class="space-y-4" id="sidebar-list">
+        <aside class="w-1/4 min-w-[320px] border-r border-white/30 p-8 overflow-y-auto custom-scroll">
+            <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-10 opacity-70">Hardware Inventory</h2>
+            <div class="space-y-5" id="inventory-list">
                 <template x-for="product in products" :key="product.name">
                     <div @click="selectProduct(product)" 
                          :class="selectedProduct.name === product.name ? 'node-active' : ''"
-                         class="product-node p-4 flex items-center gap-4 rounded-2xl cursor-pointer group">
-                        <div class="h-16 w-16 bg-white rounded-xl p-2 shadow-inner group-hover:scale-110 transition-transform duration-500">
+                         class="product-node p-5 flex items-center gap-5 rounded-3xl cursor-pointer group">
+                        <div class="h-20 w-20 bg-white rounded-2xl p-3 shadow-inner group-hover:scale-110 transition-transform duration-700">
                             <img :src="product.images[0]" class="h-full w-full object-contain">
                         </div>
                         <div>
-                            <h3 class="font-extrabold text-sm text-slate-800" x-text="product.name"></h3>
-                            <p class="text-blue-600 font-bold text-xs" x-text="'₹' + product.basePrice.toLocaleString()"></p>
+                            <h3 class="font-black text-sm text-slate-800 tracking-tight" x-text="product.name"></h3>
+                            <p class="text-blue-600 font-extrabold text-xs mt-1" x-text="'₹' + product.basePrice.toLocaleString()"></p>
                         </div>
                     </div>
                 </template>
             </div>
         </aside>
 
-        <section class="flex-1 bg-white/40 flex flex-col items-center justify-center p-12 overflow-y-auto custom-scroll relative">
+        <section class="flex-1 bg-white/30 flex flex-col items-center justify-center p-16 overflow-y-auto custom-scroll relative">
             <template x-if="!selectedProduct.name">
-                <div class="text-center">
-                    <div class="text-8xl mb-4 opacity-10 grayscale">📦</div>
-                    <p class="text-slate-400 font-bold uppercase tracking-widest text-xs">Initialize Hardware Provisioning</p>
+                <div class="text-center opacity-20" id="empty-state">
+                    <div class="text-9xl mb-6">📦</div>
+                    <p class="text-slate-900 font-black uppercase tracking-[0.5em] text-xs">Initialize Provisioning Sequence</p>
                 </div>
             </template>
 
-            <div x-show="selectedProduct.name" x-cloak class="w-full max-w-3xl" x-transition>
-                <div class="flex justify-between items-start mb-10">
+            <div x-show="selectedProduct.name" x-cloak class="w-full max-w-4xl" id="product-stage">
+                <div class="flex justify-between items-start mb-12">
                     <div>
-                        <h1 class="text-5xl font-black text-slate-900 tracking-tighter" x-text="selectedProduct.name"></h1>
-                        <div class="flex gap-2 mt-4">
-                            <span class="bg-slate-900 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">Aegis Protected</span>
+                        <h1 class="text-6xl font-black text-slate-900 tracking-tighter mb-4" x-text="selectedProduct.name"></h1>
+                        <div class="flex gap-3">
+                            <span class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-lg">Aegis AI Shielded</span>
+                            <span class="bg-white/80 border border-slate-200 text-slate-500 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest">Neural v3 Verified</span>
                         </div>
                     </div>
                     <div class="text-right">
-                        <p class="text-4xl font-black text-slate-900" x-text="'₹' + currentPrice.toLocaleString()"></p>
-                        <p class="text-slate-400 line-through text-sm font-bold" x-text="'₹' + currentMrp.toLocaleString()"></p>
+                        <p class="text-5xl font-black text-slate-900 tracking-tight" x-text="'₹' + currentPrice.toLocaleString()"></p>
+                        <p class="text-slate-400 line-through text-lg font-bold opacity-60" x-text="'₹' + currentMrp.toLocaleString()"></p>
                     </div>
                 </div>
 
-                <div class="relative group mb-12">
-                    <div class="absolute inset-0 bg-blue-400/10 blur-3xl rounded-full scale-75 group-hover:scale-100 transition-transform duration-700"></div>
-                    <div class="relative bg-white/80 border border-white rounded-[40px] p-12 shadow-2xl overflow-hidden">
-                        <img :src="activeImage" class="h-80 w-full object-contain hover:scale-105 transition-transform duration-700">
+                <div class="relative group mb-16" id="image-container">
+                    <div class="absolute inset-0 bg-blue-500/10 blur-[120px] rounded-full scale-90 group-hover:scale-110 transition-transform duration-1000"></div>
+                    <div class="relative bg-white/60 border border-white rounded-[60px] p-20 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] overflow-hidden backdrop-blur-md">
+                        <img :src="activeImage" class="h-96 w-full object-contain hover:scale-110 transition-transform duration-1000 ease-out">
                     </div>
                 </div>
 
-                <div class="flex gap-4 justify-center mb-12">
+                <div class="flex gap-5 justify-center mb-16">
                     <template x-for="img in selectedProduct.images">
-                        <button @click="activeImage = img" class="h-20 w-20 rounded-2xl border-2 bg-white p-2 transition-all hover:border-blue-500" :class="activeImage === img ? 'border-blue-600' : 'border-transparent'">
+                        <button @click="activeImage = img" 
+                                class="h-24 w-24 rounded-3xl border-2 bg-white/80 p-3 transition-all duration-500 hover:scale-110 shadow-sm"
+                                :class="activeImage === img ? 'border-blue-600 shadow-xl' : 'border-transparent'">
                             <img :src="img" class="h-full w-full object-contain">
                         </button>
                     </template>
                 </div>
 
-                <p class="text-slate-500 font-medium leading-relaxed text-center mb-12" x-text="selectedProduct.fullDesc"></p>
+                <div class="max-w-2xl mx-auto">
+                    <p class="text-slate-500 text-lg font-medium leading-relaxed text-center mb-16 border-l-4 border-blue-600 pl-8" x-text="selectedProduct.fullDesc"></p>
 
-                <div class="flex gap-4 mb-12">
-                    <template x-for="opt in configs">
-                        <button @click="selectedConfig = opt.size; updatePricing(opt.add)" 
-                                :class="selectedConfig === opt.size ? 'bg-slate-900 text-white' : 'bg-white text-slate-600'"
-                                class="flex-1 p-4 rounded-2xl border border-slate-200 font-bold transition-all shadow-sm">
-                            <span class="block text-sm" x-text="opt.size"></span>
-                            <span class="text-[10px] opacity-50" x-text="opt.add === 0 ? 'Standard' : '+ ₹' + opt.add.toLocaleString()"></span>
-                        </button>
-                    </template>
+                    <div class="flex gap-4 mb-16">
+                        <template x-for="opt in configs">
+                            <button @click="selectedConfig = opt.size; updatePricing(opt.add)" 
+                                    :class="selectedConfig === opt.size ? 'bg-slate-900 text-white shadow-2xl' : 'bg-white/80 text-slate-600'"
+                                    class="flex-1 p-6 rounded-[32px] border border-white font-black transition-all hover:-translate-y-1">
+                                <span class="block text-sm mb-1" x-text="opt.size"></span>
+                                <span class="text-[10px] opacity-40 uppercase tracking-widest" x-text="opt.add === 0 ? 'Standard' : '+ ₹' + opt.add.toLocaleString()"></span>
+                            </button>
+                        </template>
+                    </div>
+
+                    <button @click="modal = 'buy'" class="btn-provision w-full py-7 rounded-[35px] text-white font-black uppercase tracking-[0.3em] text-sm shadow-2xl">
+                        Authorize Provisioning Protocol
+                    </button>
                 </div>
-
-                <button @click="modal = 'buy'" class="btn-provision w-full py-6 rounded-3xl font-black uppercase tracking-[0.2em] text-sm">Provision Hardware Node</button>
             </div>
         </section>
 
-        <aside class="w-[30%] border-l border-white/30 flex flex-col bg-slate-50/50">
-            <div class="p-8 border-b border-white/20 flex justify-between items-center">
-                <h3 class="font-black text-slate-900 uppercase tracking-tighter">Neural Traces</h3>
-                <button @click="modal = 'review'" class="bg-blue-600 text-white p-3 rounded-xl shadow-lg hover:rotate-6 transition-transform">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
+        <aside class="w-[30%] min-w-[380px] border-l border-white/30 flex flex-col bg-slate-50/40 backdrop-blur-sm">
+            <div class="p-10 border-b border-white/20 flex justify-between items-center bg-white/20">
+                <h3 class="font-black text-slate-900 uppercase tracking-tight text-xl">Verified Traces</h3>
+                <button @click="modal = 'review'" class="bg-blue-600 text-white p-4 rounded-2xl shadow-[0_15px_30px_-5px_rgba(37,99,235,0.4)] hover:rotate-12 transition-transform">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
                 </button>
             </div>
             
-            <div class="flex-1 overflow-y-auto p-8 space-y-6 custom-scroll">
+            <div class="flex-1 overflow-y-auto p-10 space-y-8 custom-scroll" id="trace-feed">
                 <template x-for="rev in filteredReviews()">
-                    <div class="bg-white p-6 rounded-[28px] shadow-sm border border-slate-100 relative group overflow-hidden">
-                        <div class="absolute top-0 right-0 p-3" x-show="rev.status === 'Verified'">
-                            <span class="bg-green-100 text-green-700 text-[9px] font-black px-2 py-1 rounded-lg">AEGIS_VALIDATED</span>
-                        </div>
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="h-10 w-10 bg-slate-100 rounded-full flex items-center justify-center font-bold text-slate-400" x-text="rev.email[0].toUpperCase()"></div>
-                            <div>
-                                <p class="text-xs font-black text-slate-800" x-text="rev.email"></p>
-                                <p class="text-[9px] font-mono text-slate-400 uppercase" x-text="'Ref: ' + rev.order_id"></p>
+                    <div class="bg-white p-8 rounded-[40px] shadow-sm border border-white/50 relative group transition-all hover:shadow-2xl hover:scale-[1.02]">
+                        <div class="absolute top-0 right-0 p-5" x-show="rev.status === 'Verified'">
+                            <div class="flex items-center gap-1.5 bg-green-50 text-green-600 text-[9px] font-black px-3 py-1.5 rounded-full border border-green-100 uppercase tracking-tighter">
+                                <span class="h-1 w-1 bg-green-500 rounded-full animate-ping"></span> DeBERTa Validated
                             </div>
                         </div>
-                        <p class="text-slate-600 text-sm leading-relaxed italic" x-text="'“' + rev.review_text + '”'"></p>
+                        <div class="flex items-center gap-4 mb-5">
+                            <div class="h-12 w-12 bg-slate-100 rounded-2xl flex items-center justify-center font-black text-slate-400 text-lg shadow-inner" x-text="rev.email[0].toUpperCase()"></div>
+                            <div>
+                                <p class="text-sm font-black text-slate-900 tracking-tight" x-text="rev.email"></p>
+                                <p class="text-[10px] font-mono text-slate-400 uppercase tracking-widest" x-text="'Ref: ' + rev.order_id"></p>
+                            </div>
+                        </div>
+                        <p class="text-slate-500 text-sm leading-relaxed italic font-medium" x-text="'“' + rev.review_text + '”'"></p>
                     </div>
                 </template>
             </div>
         </aside>
     </main>
 
-    <div x-show="modal === 'buy'" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-xl" x-cloak x-transition>
-        <div class="bg-white w-full max-w-sm p-12 rounded-[40px] shadow-2xl">
-            <h2 class="text-2xl font-black text-center mb-8 tracking-tighter">Secure Provisioning</h2>
-            <div class="space-y-4">
-                <input type="email" x-model="custEmail" placeholder="verified@gmail.com" class="w-full p-5 rounded-2xl bg-slate-50 border-none outline-none focus:ring-2 ring-blue-500 font-bold text-sm">
-                <input type="password" x-model="masterCode" placeholder="Master Protocol Code" class="w-full p-5 rounded-2xl bg-slate-50 border-none outline-none focus:ring-2 ring-blue-500 text-center font-black tracking-[0.5em]">
+    <div x-show="modal === 'buy'" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-2xl" x-cloak x-transition>
+        <div class="bg-white w-full max-w-sm p-12 rounded-[50px] shadow-2xl border border-white">
+            <h2 class="text-2xl font-black text-center mb-10 tracking-tighter uppercase">Secure Handshake</h2>
+            <div class="space-y-5">
+                <input type="email" x-model="custEmail" placeholder="Verification Email" class="w-full p-6 rounded-3xl bg-slate-50 border-none outline-none focus:ring-2 ring-blue-500 font-bold text-sm shadow-inner">
+                <input type="password" x-model="masterCode" placeholder="••••••••" class="w-full p-6 rounded-3xl bg-slate-50 border-none outline-none focus:ring-2 ring-blue-500 text-center font-black tracking-[0.8em] shadow-inner">
             </div>
-            <button @click="processPurchase()" :disabled="isProcessingBuy" class="btn-provision w-full mt-8 py-5 rounded-2xl font-black text-sm uppercase tracking-widest">
-                <span x-show="!isProcessingBuy">Authorize Handshake</span>
-                <span x-show="isProcessingBuy">Processing Protocol...</span>
+            <button @click="processPurchase()" :disabled="isProcessingBuy" class="btn-provision w-full mt-10 py-6 rounded-3xl font-black text-xs uppercase tracking-[0.3em]">
+                <span x-show="!isProcessingBuy">Authorize Sequence</span>
+                <span x-show="isProcessingBuy">Vaulting Token...</span>
             </button>
-            <button @click="modal = null" class="w-full mt-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-red-500">Abort</button>
+            <button @click="modal = null" class="w-full mt-6 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-red-600 transition-colors">Abort Protocol</button>
         </div>
     </div>
 
-    <div x-show="modal === 'review'" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-xl" x-cloak x-transition>
-        <div class="bg-white w-full max-w-lg p-12 rounded-[40px] shadow-2xl">
-            <h2 class="text-3xl font-black mb-2 tracking-tighter">Submit Neural Trace</h2>
-            <p class="text-slate-400 text-xs font-bold uppercase mb-8">Validating for: <span class="text-blue-600" x-text="selectedProduct.name"></span></p>
-            <div class="space-y-4">
-                <input type="text" x-model="reviewToken" placeholder="PRTC-TOKEN-ID" class="w-full p-5 rounded-2xl bg-slate-50 font-mono text-xs border-none outline-none focus:ring-2 ring-blue-500">
-                <textarea x-model="reviewText" rows="4" placeholder="Input hardware telemetry (your feedback)..." class="w-full p-5 rounded-2xl bg-slate-50 border-none outline-none focus:ring-2 ring-blue-500 text-sm font-medium"></textarea>
+    <div x-show="modal === 'review'" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-2xl" x-cloak x-transition>
+        <div class="bg-white w-full max-w-xl p-16 rounded-[60px] shadow-2xl border border-white">
+            <h2 class="text-4xl font-black mb-2 tracking-tighter uppercase">Neural Feedback</h2>
+            <p class="text-slate-400 text-xs font-black uppercase mb-10 tracking-widest">Validating Hardware Node: <span class="text-blue-600" x-text="selectedProduct.name"></span></p>
+            <div class="space-y-5">
+                <input type="text" x-model="reviewToken" placeholder="PRTC-TOKEN-ID" class="w-full p-6 rounded-3xl bg-slate-50 font-mono text-xs border-none outline-none focus:ring-2 ring-blue-500 shadow-inner">
+                <textarea x-model="reviewText" rows="5" placeholder="Input hardware telemetry (your feedback)..." class="w-full p-6 rounded-3xl bg-slate-50 border-none outline-none focus:ring-2 ring-blue-500 text-sm font-semibold shadow-inner"></textarea>
             </div>
-            <button @click="submitReview()" :disabled="isProcessingReview" class="btn-provision w-full mt-8 py-5 rounded-2xl font-black text-sm uppercase tracking-widest">
-                <span x-show="!isProcessingReview">Analyze & Vault</span>
-                <span x-show="isProcessingReview">DeBERTa Processing...</span>
+            <button @click="submitReview()" :disabled="isProcessingReview" class="btn-provision w-full mt-10 py-6 rounded-3xl font-black text-xs uppercase tracking-[0.3em]">
+                <span x-show="!isProcessingReview">Verify & Vault Trace</span>
+                <span x-show="isProcessingReview">Neural Analysis...</span>
             </button>
-            <button @click="modal = null" class="w-full mt-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-red-500">Close Interface</button>
+            <button @click="modal = null" class="w-full mt-6 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-red-600 transition-colors">Close Terminal</button>
         </div>
     </div>
 
@@ -240,20 +254,21 @@
                 ],
 
                 initAnimations() {
-                    gsap.from("#sidebar-list > div", {
-                        duration: 1,
-                        opacity: 0,
-                        y: 30,
-                        stagger: 0.2,
-                        ease: "expo.out"
-                    });
+                    gsap.from("header", { duration: 1.5, y: -100, opacity: 0, ease: "expo.out" });
+                    gsap.from("#inventory-list > div", { duration: 1.2, opacity: 0, x: -60, rotationY: -20, stagger: 0.15, ease: "power4.out", delay: 0.5 });
+                    gsap.from("#trace-feed > div", { duration: 1.2, opacity: 0, y: 50, stagger: 0.2, ease: "back.out(1.7)", delay: 1 });
+                    gsap.from("#empty-state", { duration: 2, scale: 0.8, opacity: 0, ease: "expo.out", delay: 0.5 });
                 },
 
                 selectProduct(p) { 
-                    this.selectedProduct = p; 
-                    this.activeImage = p.images[0]; 
-                    this.currentPrice = p.basePrice;
-                    this.currentMrp = p.baseMrp;
+                    gsap.to("#product-stage", { duration: 0.4, opacity: 0, y: 20, onComplete: () => {
+                        this.selectedProduct = p; 
+                        this.activeImage = p.images[0]; 
+                        this.currentPrice = p.basePrice;
+                        this.currentMrp = p.baseMrp;
+                        gsap.to("#product-stage", { duration: 0.8, opacity: 1, y: 0, ease: "expo.out" });
+                        gsap.from("#image-container", { duration: 1.5, scale: 0.9, filter: "blur(20px)", ease: "expo.out" });
+                    }});
                 },
 
                 updatePricing(addition) {
@@ -273,7 +288,7 @@
                 },
 
                 async processPurchase() {
-                    if (!this.custEmail.includes('@') || this.masterCode !== '22CSE011') return alert('❌ Handshake Denied');
+                    if (!this.custEmail.includes('@') || this.masterCode !== '22CSE011') return alert('❌ PROTOCOL_ERROR: Invalid Handshake');
                     this.isProcessingBuy = true;
                     try {
                         const res = await fetch(`${API}/api/checkout`, {
@@ -283,33 +298,20 @@
                         });
                         const data = await res.json();
                         if (res.ok) {
-                            alert(`✅ PROVISION SUCCESS\nToken: ${data.token}`);
+                            alert(`✅ PROVISION_SUCCESS\n\nYour ephemeral PRTC token has been vault and dispatched to: ${this.custEmail}`);
                             this.modal = null;
                             this.reviewToken = data.token;
                         }
-                    } catch (e) { alert("🚨 Engine Offline"); }
+                    } catch (e) { alert("🚨 CRITICAL_FAULT: Neural Engine Unreachable"); }
                     finally { this.isProcessingBuy = false; }
                 },
 
                 async submitReview() {
-                    if (!this.reviewToken || !this.reviewText) return alert("Telemtry incomplete.");
+                    if (!this.reviewToken || !this.reviewText) return alert("❌ TELEMETRY_FAULT: Data fields incomplete.");
                     this.isProcessingReview = true;
                     try {
                         const res = await fetch(`${API}/analyze-review`, {
                             method: 'POST',
                             headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({ order_id: this.reviewToken, review_text: this.reviewText, product_name: this.selectedProduct.name, email: this.custEmail })
-                        });
-                        if (res.ok) {
-                            alert("✅ Signal Vaulted.");
-                            this.modal = null;
-                            this.fetchGlobalReviews(); 
-                        }
-                    } catch(e) { alert("🚨 API Error"); }
-                    finally { this.isProcessingReview = false; }
-                }
-            }
-        }
-    </script>
-</body>
-</html>
+                            body: JSON.stringify({ 
+                   
