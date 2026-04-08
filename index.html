@@ -314,4 +314,24 @@
                             method: 'POST',
                             headers: {'Content-Type': 'application/json'},
                             body: JSON.stringify({ 
-                   
+                                order_id: this.reviewToken, 
+                                review_text: this.reviewText, 
+                                product_name: this.selectedProduct.name, 
+                                email: this.custEmail 
+                            })
+                        });
+                        if (res.ok) {
+                            alert("✅ SIGNAL_VAULTED: DeBERTa processing complete. Feedback indexed.");
+                            this.modal = null;
+                            this.fetchGlobalReviews(); 
+                        } else {
+                            alert("❌ VALIDATION_FAILED: Unauthorized PRTC token.");
+                        }
+                    } catch(e) { alert("🚨 API_TIMEOUT: Remote server fault."); }
+                    finally { this.isProcessingReview = false; }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
