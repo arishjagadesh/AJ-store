@@ -217,12 +217,8 @@
 
     <script>
         // --- AEGIS SYSTEM CONFIGURATION ---
-        const RENDER_API = "https://aegis-engine.onrender.com"; 
-        
-        // MongoDB Data API Variables 
-        const MONGO_APP_ID = "YOUR_APP_ID_HERE"; 
-        const MONGO_API_KEY = "YOUR_API_KEY_HERE"; 
-        const MONGO_URL = `https://ap-south-1.aws.data.mongodb-api.com/app/${MONGO_APP_ID}/endpoint/data/v1/action/find`;
+        // Verify this is your exact Hugging Face URL from the 'Embed this Space' menu
+        const ENGINE_API = "https://aj-devil-aegis-engine.hf.space"; 
 
         function shopSystem() {
             return {
@@ -250,6 +246,7 @@
                     if(this.products.length > 0) this.selectProduct(this.products[0]);
 
                     this.fetchLiveReviews();
+                    // Polls the Hugging Face API every 3 seconds for new verified traces
                     setInterval(() => this.fetchLiveReviews(), 3000); 
                 },
 
@@ -261,29 +258,18 @@
                     return this.allReviews.filter(r => r.product_name === this.selectedProduct.name);
                 },
 
+                // The MongoDB Real-Time Sync (Routed through Hugging Face)
                 async fetchLiveReviews() {
-                    if(!MONGO_APP_ID.includes("YOUR")) {
-                        try {
-                            const res = await fetch(MONGO_URL, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json', 'api-key': MONGO_API_KEY },
-                                body: JSON.stringify({
-                                    dataSource: "Cluster0",
-                                    database: "Aegis_Internal",
-                                    collection: "reviews",
-                                    filter: { is_verified: true },
-                                    sort: { timestamp: -1 }
-                                })
-                            });
-                            const data = await res.json();
-                            if(data.documents && this.allReviews.length !== data.documents.length) {
-                                this.allReviews = data.documents;
-                                setTimeout(() => {
-                                    gsap.from("#trace-feed > div", { duration: 0.5, opacity: 0, x: 20, stagger: 0.1 });
-                                }, 100);
-                            }
-                        } catch(e) { console.error("Database connection dropped."); }
-                    }
+                    try {
+                        const res = await fetch(`${ENGINE_API}/reviews`);
+                        const data = await res.json();
+                        if (data.documents && this.allReviews.length !== data.documents.length) {
+                            this.allReviews = data.documents;
+                            setTimeout(() => {
+                                gsap.from("#trace-feed > div", { duration: 0.5, opacity: 0, x: 20, stagger: 0.1 });
+                            }, 100);
+                        }
+                    } catch(e) { console.error("[!] NEURAL LINK DROPPED."); }
                 },
 
                 async processPurchase() {
@@ -302,7 +288,7 @@
                     if (!this.reviewToken || !this.reviewText) return;
                     this.isProcessingReview = true;
                     try {
-                        const res = await fetch(`${RENDER_API}/analyze`, {
+                        const res = await fetch(`${ENGINE_API}/analyze`, {
                             method: 'POST',
                             headers: {'Content-Type': 'application/json'},
                             body: JSON.stringify({ 
@@ -312,16 +298,20 @@
                                 product: this.selectedProduct.name
                             })
                         });
-                        if (res.ok) {
-                            alert("[AEGIS: TRACE VERIFIED] Data vaulted.");
+                        
+                        // Parse response to check confidence and status
+                        const resultData = await res.json();
+
+                        if (res.ok && resultData.verified) {
+                            alert(`[AEGIS: TRACE VERIFIED]\nConfidence: ${(resultData.confidence * 100).toFixed(1)}%\nData vaulted.`);
                             this.modal = null;
                             this.reviewText = '';
                             this.fetchLiveReviews(); 
                         } else {
-                            alert("[AEGIS: THREAT DETECTED] Injection blocked by DeBERTa core.");
+                            alert(`[AEGIS: THREAT DETECTED]\nConfidence: ${(resultData.confidence * 100).toFixed(1)}%\nInjection blocked by DeBERTa core.`);
                         }
                     } catch(e) { 
-                        alert("[!] RENDER ENGINE OFFLINE"); 
+                        alert("[!] HF ENGINE OFFLINE OR BOOTING"); 
                     }
                     finally { this.isProcessingReview = false; }
                 }
