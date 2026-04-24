@@ -359,33 +359,48 @@
                 async submitReview() {
                     if (!this.reviewToken || !this.reviewText) return;
                     this.isProcessingReview = true;
+    
                     try {
                         const res = await fetch(`${ENGINE_API}/analyze`, {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({ 
-                                text: this.reviewText,
-                                token: this.reviewToken,
-                                email: this.custEmail || "admin@aegis.com",
-                                product: this.selectedProduct.name
-                            })
-                        });
-                        
-                        const resultData = await res.json();
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ 
+                        text: this.reviewText,
+                        token: this.reviewToken,
+                        email: this.custEmail || "admin@aegis.com",
+                        product: this.selectedProduct.name
+                        })
+                });
+        
+        const resultData = await res.json();
+        
+        // --- DEFENSIVE PARSING START ---
+        // Log the raw response so you can see exactly what the backend sent
+        console.log("Aegis Core Response:", resultData);
+        
+        // Safely extract the score by checking multiple possible keys, defaulting to 0 if all fail
+        const rawScore = resultData.confidence_score || resultData.confidence || resultData.score || 0;
+        const confidencePercentage = (rawScore * 100).toFixed(1);
+        
+        // Safely check verification status (assume verified if score >= 0.7 as a fallback)
+        const isVerified = resultData.verified === true || rawScore >= 0.7;
+        // --- DEFENSIVE PARSING END ---
 
-                        if (res.ok && resultData.verified) {
-                            alert(`Trace Verified.\nConfidence: ${(resultData.confidence * 100).toFixed(1)}%`);
-                            this.modal = null;
-                            this.reviewText = '';
-                            this.fetchLiveReviews(); 
-                        } else {
-                            alert(`Threat Blocked.\nConfidence: ${(resultData.confidence * 100).toFixed(1)}%`);
-                        }
-                    } catch(e) { 
-                        alert("Engine is offline."); 
-                    }
-                    finally { this.isProcessingReview = false; }
-                }
+        if (res.ok && isVerified) {
+            alert(`Trace Verified.\nConfidence: ${confidencePercentage}%`);
+            this.modal = null;
+            this.reviewText = '';
+            this.fetchLiveReviews(); 
+        } else {
+            alert(`Threat Blocked.\nConfidence: ${confidencePercentage}%`);
+        }
+    } catch(e) { 
+        console.error("Fetch Error:", e);
+        alert("Engine is offline or unreachable."); 
+    } finally { 
+        this.isProcessingReview = false; 
+    }
+}
             }
         }
     </script>
